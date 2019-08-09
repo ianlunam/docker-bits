@@ -7,6 +7,19 @@ pipeline {
                     // Get docker information from system
                     x = "docker info".execute().text
 
+                    // Check storage driver:
+                    for (line in x.split('\n')) {
+                        trimmed = line.trim()
+                        splitted = trimmed.split()
+                        if (splitted.length >= 1) {
+                            if (splitted[0] == 'Storage') {
+                                if (splitted[2] != 'devicemapper') {
+                                    error "This script only works if Storage Driver is devicemapper" 
+                                }
+                            }
+                        }
+                    }
+
                     AVAIL = x.split('\n')[14]
                     AVAIL = AVAIL.split()[3]
                     ALLOC = x.split('\n')[13]
