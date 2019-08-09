@@ -1,14 +1,14 @@
 pipeline {
     agent any
     stages {
-        stage ("Checking Used Space") {
+        stage ("Checking Storage Type") {
             steps {
                 script {
                     // Get docker information from system
-                    x = "docker info".execute().text
+                    info = "docker info".execute().text.split("\n")
 
                     // Check storage driver:
-                    for (line in x.split('\n')) {
+                    for (line in info) {
                         trimmed = line.trim()
                         splitted = trimmed.split()
                         if (splitted.length >= 1) {
@@ -19,10 +19,16 @@ pipeline {
                             }
                         }
                     }
-
-                    AVAIL = x.split('\n')[14]
+                }
+            }
+        }
+        
+        stage ("Checking Used Space") {
+            steps {
+                script {
+                    AVAIL = info[14]
                     AVAIL = AVAIL.split()[3]
-                    ALLOC = x.split('\n')[13]
+                    ALLOC = info[13]
                     ALLOC = ALLOC.split()[3]
 
                     print "Allocated space: " + ALLOC + "\nAvailable space: " + AVAIL
